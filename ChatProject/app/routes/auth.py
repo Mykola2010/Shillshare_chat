@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
+from fastapi.responses import RedirectResponse
 from sqlalchemy.orm import Session
 from app.models.skill import UserSkill
 
@@ -60,3 +61,9 @@ def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depend
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Невірні креденшіали")
     token = create_access_token({"sub": str(user.id)})
     return TokenOut(access_token=token)
+
+@router.get("/logout")
+def logout():
+    response = RedirectResponse(url="/auth?mode=login")
+    response.delete_cookie("user_id")
+    return response

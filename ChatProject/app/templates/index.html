@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SkillShare Hub</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 text-gray-800">
+
+
+  <nav class="bg-white shadow-md">
+    <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+
+      <div class="flex items-center space-x-2">
+        <img src="{{ url_for('static', path='logo_black.png') }}"
+             alt="Логотип SkillShare Hub" class="h-10">
+      </div>
+
+
+      <div class="space-x-4">
+        <a href="/auth?mode=login" class="px-4 py-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700">Увійти</a>
+        <a href="/auth?mode=register" class="px-4 py-2 rounded-lg bg-gray-200 hover:bg-gray-300">Зареєструватися</a>
+      </div>
+    </div>
+  </nav>
+
+
+  <section class="bg-indigo-50 py-20">
+    <div class="max-w-4xl mx-auto text-center">
+      <h1 class="text-4xl md:text-5xl font-bold text-gray-800 mb-6">
+        Вчіться та діліться навичками з людьми у всьому світі
+      </h1>
+      <p class="text-lg text-gray-600 mb-8">
+        Спілкуйтесь з учнями, діліться своїм досвідом та розвивайтесь разом у спільноті, створеній для обміну знаннями.
+      </p>
+      <a href="/auth?mode=register" class="px-6 py-3 bg-indigo-600 text-white rounded-lg shadow hover:bg-indigo-700">
+        Почати
+      </a>
+    </div>
+  </section>
+
+
+  <section class="py-16">
+    <div class="max-w-6xl mx-auto px-6 grid md:grid-cols-3 gap-10 text-center">
+      <div class="p-6 bg-white shadow rounded-2xl">
+        <h3 class="text-xl font-semibold text-indigo-600 mb-3">🌍 Обмін навичками</h3>
+        <p class="text-gray-600">Пропонуйте свої навички та навчайтеся в інших у глобальній спільноті.</p>
+      </div>
+      <div class="p-6 bg-white shadow rounded-2xl">
+        <h3 class="text-xl font-semibold text-indigo-600 mb-3">💬 Чат у реальному часі</h3>
+        <p class="text-gray-600">Спілкуйтесь миттєво з людьми, які мають спільні інтереси та цілі.</p>
+      </div>
+      <div class="p-6 bg-white shadow rounded-2xl">
+        <h3 class="text-xl font-semibold text-indigo-600 mb-3">🤝 Спільнота</h3>
+        <p class="text-gray-600">Будуйте значущі зв’язки та розвивайте свою мережу знань.</p>
+      </div>
+    </div>
+  </section>
+
+
+  <footer class="bg-white shadow-inner py-6">
+    <div class="max-w-6xl mx-auto px-6 text-center text-gray-500">
+      &copy; 2025 SkillShare Hub. Всі права захищені.
+    </div>
+  </footer>
+
+</body>
+</html>

@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="uk" class="h-full bg-gray-100">
+<head>
+  <meta charset="UTF-8" />
+  <title>Dashboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="h-full">
+<div class="min-h-full">
+
+
+  <nav class="bg-gray-800">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div class="flex h-16 items-center justify-between">
+        <div class="flex items-center">
+          <div class="shrink-0">
+            <img src="{{ url_for('static', path='logo_black.png') }}"
+                 alt="Company Logo" class="h-8 w-8" />
+          </div>
+          <div class="hidden md:block">
+            <div class="ml-10 flex items-baseline space-x-4" id="navigation">
+
+            </div>
+          </div>
+        </div>
+
+
+        <div class="hidden md:block">
+          <div class="ml-4 flex items-center md:ml-6">
+            <div class="relative ml-3">
+              <button id="user-menu-button"
+                      class="relative flex max-w-xs items-center rounded-full focus:outline-2 focus:outline-offset-2 focus:outline-indigo-500">
+                <img id="user-avatar" src="" alt="User avatar"
+                     class="h-8 w-8 rounded-full outline outline-white/10" />
+              </button>
+              <div id="dropdown-menu"
+                   class="hidden absolute right-0 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black/5">
+                <span id="welcome" class="block px-4 py-2 text-sm text-gray-700"></span>
+                <span id="user-email" class="block px-4 py-2 text-sm text-gray-500"></span>
+                <button onclick="logout()"
+                        class="w-full text-left block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Вийти</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+
+        <div class="-mr-2 flex md:hidden">
+          <button id="mobile-menu-button"
+                  class="relative inline-flex items-center justify-center rounded-md p-2 text-gray-400 hover:bg-white/5 hover:text-white">
+            <svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="1.5"
+                 viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round"
+                 d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" /></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+
+  <header class="relative bg-white shadow-sm">
+    <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+      <h1 id="dashboard-title" class="text-3xl font-bold tracking-tight text-gray-900"></h1>
+    </div>
+  </header>
+
+
+  <main>
+    <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+      <p id="dashboard-welcome" class="text-gray-700 mb-4"></p>
+
+
+<div id="skills-section" class="mb-6">
+  <h2 class="text-xl font-semibold mb-2">Мої навички</h2>
+
+
+  <div class="flex space-x-2 mb-4">
+    <input id="new-skill-input" type="text" placeholder="Нова навичка"
+           class="border px-2 py-1 rounded flex-1" />
+    <button id="add-skill-btn" class="bg-blue-500 text-white px-3 py-1 rounded">Додати</button>
+  </div>
+
+
+  <ul id="my-skills-list" class="list-disc list-inside text-gray-700">
+
+  </ul>
+</div>
+
+
+<div id="rooms-section" class="mb-6">
+  <h2 class="text-xl font-semibold mb-2">Чати в кімнатах</h2>
+
+
+  <div class="flex space-x-2 mb-4">
+    <input id="new-room-input" type="text" placeholder="Нова кімната" class="border px-2 py-1 rounded flex-1" />
+    <button id="create-room-btn" class="bg-blue-500 text-white px-3 py-1 rounded">Створити</button>
+  </div>
+
+
+  <ul id="rooms-list" class="list-disc list-inside text-gray-700 mb-4"></ul>
+
+
+  <div id="room-chat-section" class="hidden">
+    <h3 id="room-title" class="font-semibold mb-2"></h3>
+    <ul id="room-messages" class="border rounded p-2 h-48 overflow-y-auto mb-2"></ul>
+    <div class="flex space-x-2">
+      <input id="room-message-input" type="text" placeholder="Написати повідомлення..." class="border px-2 py-1 flex-1 rounded" />
+      <button id="send-room-message-btn" class="bg-green-500 text-white px-3 py-1 rounded">Відправити</button>
+    </div>
+  </div>
+</div>
+
+
+
+      <div id="match-section" class="mb-6">
+        <h2 class="text-xl font-semibold mb-2">Знайти користувачів за навичками</h2>
+        <p>Введіть принаймні 3 навички (через кому):</p>
+        <input type="text" id="skills-input" placeholder="Python, JavaScript, SQL"
+               class="border rounded px-3 py-2 w-full mb-2"/>
+        <button id="search-match-btn"
+                class="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700">Пошук</button>
+        <div id="matches-list" class="mt-4 space-y-2">
+
+        </div>
+      </div>
+
+
+      <div id="chat-section" class="mt-6 hidden">
+        <h2 class="text-xl font-semibold mb-2">Чати</h2>
+        <div id="chat-list" class="space-y-2">
+
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+
+
+<script>
+function logout() {
+  localStorage.removeItem("access_token");
+  window.location.href = "/auth?mode=login";
+}
+
+const userMenuBtn = document.getElementById("user-menu-button");
+const dropdownMenu = document.getElementById("dropdown-menu");
+if (userMenuBtn) {
+  userMenuBtn.addEventListener("click", () => {
+    dropdownMenu.classList.toggle("hidden");
+  });
+}
+
+const mobileBtn = document.getElementById("mobile-menu-button");
+if (mobileBtn) {
+  mobileBtn.addEventListener("click", () => alert("TODO: implement mobile menu"));
+}
+
+document.addEventListener("DOMContentLoaded", async () => {
+  const token = localStorage.getItem("access_token");
+  if (!token) { logout(); return; }
+
+  try {
+    const res = await fetch("/dashboard-data", { headers: { "Authorization": `Bearer ${token}` } });
+    if (!res.ok) throw new Error("Unauthorized");
+    const data = await res.json();
+
+    // Update user info
+    document.getElementById("user-avatar").src = `https://ui-avatars.com/api/?name=${data.user.username}&background=random`;
+    document.getElementById("welcome").textContent = data.user.username;
+    document.getElementById("user-email").textContent = data.user.email;
+    document.getElementById("dashboard-title").textContent = `Ласкаво просимо, ${data.user.username}!`;
+    document.getElementById("dashboard-welcome").textContent = `Hello ${data.user.username}, welcome back 🎉`;
+
+    // Populate navigation
+    const navEl = document.getElementById("navigation");
+    navEl.innerHTML = "";
+    data.navigation.forEach(item => {
+      const a = document.createElement("a");
+      a.href = item.href;
+      a.textContent = item.name;
+      a.className = "rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-white/5 hover:text-white";
+      navEl.appendChild(a);
+
+      // Show chat section when "Чати" is clicked
+      if (item.name === "Чати") {
+        a.addEventListener("click", (e) => {
+          e.preventDefault();
+          document.getElementById("chat-section").classList.toggle("hidden");
+          loadChats();
+        });
+      }
+    });
+
+    // Find a Match button click
+    document.getElementById("search-match-btn").addEventListener("click", async () => {
+      const skillsInput = document.getElementById("skills-input").value;
+      const skills = skillsInput.split(",").map(s => s.trim()).filter(s => s);
+      if (skills.length < 3) {
+        alert("Введіть принаймні 3 навички!");
+        return;
+      }
+
+      try {
+        const matchRes = await fetch("/matches/find", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+          },
+          body: JSON.stringify({ skills })
+        });
+        if (!matchRes.ok) throw new Error("Failed to find matches");
+        const matches = await matchRes.json();
+
+        const matchesList = document.getElementById("matches-list");
+        matchesList.innerHTML = "";
+        matches.forEach(user => {
+          const div = document.createElement("div");
+          div.className = "p-2 border rounded flex justify-between items-center hover:bg-gray-50";
+          div.innerHTML = `
+            <span>${user.username} (Спільні навички: ${user.shared_skills.join(", ")})</span>
+            <button class="bg-green-500 text-white px-2 py-1 rounded">Message</button>
+          `;
+          div.querySelector("button").addEventListener("click", async () => {
+            // Save match and redirect to chat
+            await fetch(`/matches/save/${user.id}`, {
+              method: "POST",
+              headers: { "Authorization": `Bearer ${token}` }
+            });
+            alert(`Chat started with ${user.username}. They will appear in your chats.`);
+          });
+          matchesList.appendChild(div);
+        });
+      } catch (err) {
+        console.error(err);
+        alert("Failed to find matches.");
+      }
+    });
+
+    // Load chats dynamically
+    async function loadChats() {
+      const chatList = document.getElementById("chat-list");
+      chatList.innerHTML = "<p>Loading chats...</p>";
+      try {
+        const chatRes = await fetch("/chats", { headers: { "Authorization": `Bearer ${token}` } });
+        if (!chatRes.ok) throw new Error("Failed to load chats");
+        const chats = await chatRes.json();
+        chatList.innerHTML = "";
+        chats.forEach(chat => {
+          const div = document.createElement("div");
+          div.className = "p-2 border rounded hover:bg-gray-50 cursor-pointer";
+          div.textContent = chat.name;
+          div.addEventListener("click", () => alert(`Open chat: ${chat.name}`));
+          chatList.appendChild(div);
+        });
+      } catch (err) {
+        chatList.innerHTML = "<p class='text-red-500'>Failed to load chats.</p>";
+      }
+    }
+
+console.log("Skills script loaded");
+
+document.addEventListener("DOMContentLoaded", async () => {
+  console.log("Skills script running");
+
+  const token = localStorage.getItem("access_token");
+  if (!token) {
+    console.log("No token found");
+    return;
+  }
+
+  const skillsListEl = document.getElementById("my-skills-list");
+  const inputEl = document.getElementById("new-skill-input");
+  const addBtn = document.getElementById("add-skill-btn");
+
+  async function loadMySkills() {
+    try {
+      const res = await fetch("/skills/my", { headers: { "Authorization": `Bearer ${token}` } });
+      console.log("/skills/my response:", res);
+      if (!res.ok) return;
+
+      const skills = await res.json();
+      skillsListEl.innerHTML = "";
+      skills.forEach(skill => {
+        const li = document.createElement("li");
+        li.textContent = skill.name;
+        skillsListEl.appendChild(li);
+      });
+    } catch (err) {
+      console.error("Error loading skills:", err);
+    }
+  }
+
+  loadMySkills();
+
+  addBtn.addEventListener("click", async () => {
+    const skillName = inputEl.value.trim();
+    if (!skillName) return alert("Enter a skill");
+
+    try {
+      console.log("Creating skill:", skillName);
+
+      const createRes = await fetch("/skills/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify({ name: skillName })
+      });
+      console.log("/skills/ create response:", createRes);
+
+      if (!createRes.ok) {
+        const text = await createRes.text();
+        console.error("Failed to create skill:", text);
+        return alert("Failed to create skill. Check console.");
+      }
+
+      const skill = await createRes.json();
+
+      const addRes = await fetch(`/skills/add/${skill.id}`, {
+        method: "POST",
+        headers: { "Authorization": `Bearer ${token}` }
+      });
+      console.log(`/skills/add/${skill.id} response:`, addRes);
+
+      inputEl.value = "";
+      loadMySkills();
+    } catch (err) {
+      console.error("Error adding skill:", err);
+    }
+  });
+});
+async function loadRooms() {
+  const res = await fetch("/rooms", { headers: { "Authorization": `Bearer ${token}` } });
+  const rooms = await res.json();
+  const roomsList = document.getElementById("rooms-list");
+  roomsList.innerHTML = "";
+  rooms.forEach(room => {
+    const li = document.createElement("li");
+    li.className = "cursor-pointer hover:text-blue-600";
+    li.textContent = room.name;
+    li.addEventListener("click", () => joinRoom(room.id, room.name));
+    roomsList.appendChild(li);
+  });
+}
+
+// Join a room
+async function joinRoom(roomId, roomName) {
+  await fetch(`/rooms/join/${roomId}`, { method: "POST", headers: { "Authorization": `Bearer ${token}` } });
+  currentRoomId = roomId;
+  document.getElementById("room-title").textContent = `Кімната: ${roomName}`;
+  document.getElementById("room-chat-section").classList.remove("hidden");
+  loadRoomMessages();
+}
+
+// Load messages for the current room
+async function loadRoomMessages() {
+  if (!currentRoomId) return;
+  const res = await fetch(`/rooms/messages/${currentRoomId}`, { headers: { "Authorization": `Bearer ${token}` } });
+  const messages = await res.json();
+  const messagesList = document.getElementById("room-messages");
+  messagesList.innerHTML = "";
+  messages.forEach(msg => {
+    const li = document.createElement("li");
+    li.textContent = `${msg.sender_id}: ${msg.content}`;
+    messagesList.appendChild(li);
+  });
+}
+
+// Send message
+document.getElementById("send-room-message-btn").addEventListener("click", async () => {
+  const content = document.getElementById("room-message-input").value.trim();
+  if (!content || !currentRoomId) return;
+
+  await fetch("/rooms/message", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
+    body: JSON.stringify({ room_id: currentRoomId, content })
+  });
+
+  document.getElementById("room-message-input").value = "";
+  loadRoomMessages();
+});
+
+// Create a new room
+document.getElementById("create-room-btn").addEventListener("click", async () => {
+  const name = document.getElementById("new-room-input").value.trim();
+  if (!name) return alert("Введіть назву кімнати");
+
+  await fetch("/rooms", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
+    body: JSON.stringify({ name })
+  });
+  document.getElementById("new-room-input").value = "";
+  loadRooms();
+});
+
+// Initial load
+loadRooms();
+
+  } catch (err) {
+    console.error(err);
+    logout();
+  }
+});
+
+</script>
+</body>
+</html>

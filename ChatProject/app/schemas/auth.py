@@ -8,3 +8,7 @@ class RegisterIn(BaseModel):
 class TokenOut(BaseModel):
     access_token: str
     token_type: str = "bearer"
+
+class RegisterData(BaseModel):
+    email: str
+    password: str

@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Auth | SkillShare Hub</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-900 flex items-center justify-center min-h-screen text-white">
+
+  <div class="w-full max-w-md bg-gray-800 p-6 rounded-lg shadow-lg">
+
+    <form id="login-form" class="space-y-4">
+      <h2 class="text-2xl font-bold text-center">Sign In</h2>
+      <div>
+        <label for="login-username" class="block text-sm">Username</label>
+        <input id="login-username" name="username" type="text" required
+               class="w-full p-2 rounded bg-gray-700 border border-gray-600">
+      </div>
+      <div>
+        <label for="login-password" class="block text-sm">Password</label>
+        <input id="login-password" name="password" type="password" required
+               class="w-full p-2 rounded bg-gray-700 border border-gray-600">
+      </div>
+      <button type="submit"
+              class="w-full bg-indigo-600 hover:bg-indigo-500 text-white py-2 rounded">
+        Sign in
+      </button>
+      <p id="loginMessage" class="text-red-400 text-sm mt-2"></p>
+    </form>
+
+
+    <form id="register-form" class="space-y-4 hidden">
+      <h2 class="text-2xl font-bold text-center">Create Account</h2>
+      <div>
+        <label for="reg-username" class="block text-sm">Username</label>
+        <input id="reg-username" name="username" type="text" required
+               class="w-full p-2 rounded bg-gray-700 border border-gray-600">
+      </div>
+      <div>
+        <label for="reg-email" class="block text-sm">Email</label>
+        <input id="reg-email" name="email" type="email" required
+               class="w-full p-2 rounded bg-gray-700 border border-gray-600">
+      </div>
+      <div>
+        <label for="reg-password" class="block text-sm">Password</label>
+        <input id="reg-password" name="password" type="password" required
+               class="w-full p-2 rounded bg-gray-700 border border-gray-600">
+      </div>
+      <div>
+        <label for="reg-confirm" class="block text-sm">Confirm Password</label>
+        <input id="reg-confirm" name="confirm" type="password" required
+               class="w-full p-2 rounded bg-gray-700 border border-gray-600">
+      </div>
+      <button type="submit"
+              class="w-full bg-green-600 hover:bg-green-500 text-white py-2 rounded">
+        Create account
+      </button>
+      <p id="registerMessage" class="text-red-400 text-sm mt-2"></p>
+    </form>
+
+
+    <div class="mt-4 text-center">
+      <p id="toggle-login" class="text-sm text-gray-400">
+        Not a member? <a href="#" onclick="toggleForms()" class="text-indigo-400 hover:underline">Create an account</a>
+      </p>
+      <p id="toggle-register" class="text-sm text-gray-400 hidden">
+        Already have an account? <a href="#" onclick="toggleForms()" class="text-indigo-400 hover:underline">Sign in</a>
+      </p>
+    </div>
+  </div>
+
+
+<script>
+  // TOGGLE FORMS
+  function toggleForms() {
+    document.getElementById("login-form").classList.toggle("hidden");
+    document.getElementById("register-form").classList.toggle("hidden");
+    document.getElementById("toggle-login").classList.toggle("hidden");
+    document.getElementById("toggle-register").classList.toggle("hidden");
+  }
+
+  // LOGIN FETCH
+  const loginForm = document.getElementById("login-form");
+loginForm.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const formData = new FormData(loginForm);
+
+  const response = await fetch("/auth/login", {
+    method: "POST",
+    body: formData
+  });
+
+  const data = await response.json();
+
+ if (data.success) {
+  localStorage.setItem("access_token", data.token);
+  window.location.href = "/dashboard";
+} else {
+    alert(data.detail || "Login failed");
+  }
+
+  const token = localStorage.getItem("access_token");
+fetch("/dashboard-data", {
+  headers: { "Authorization": `Bearer ${token}` }
+})
+  .then(res => res.text())
+  .then(html => { document.body.innerHTML = html; })
+  .catch(() => { window.location.href = "/auth?mode=login"; });
+});
+
+  // REGISTER FETCH
+  const registerForm = document.getElementById("register-form");
+const registerMsg = document.getElementById("registerMessage");
+
+registerForm.addEventListener("submit", async (e) => {
+  e.preventDefault();
+
+  const data = {
+    username: registerForm.username.value,
+    email: registerForm.email.value,
+    password: registerForm.password.value
+  };
+
+  try {
+    const response = await fetch("/auth/register", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data)
+    });
+
+    const result = await response.json();
+
+    if (result.token) {
+      localStorage.setItem("access_token", result.token); // store token
+      window.location.href = "/dashboard";              // redirect
+    } else {
+      registerMsg.textContent = result.detail || "Registration failed";
+    }
+  } catch {
+    registerMsg.textContent = "Something went wrong.";
+  }
+});
+const token = localStorage.getItem("access_token");
+fetch("/dashboard", {
+  headers: {
+    "Authorization": `Bearer ${token}`
+  }
+});
+
+
+  // ?mode=register
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.get("mode") === "register") {
+    toggleForms(); // shows register form initially
+  }
+</script>
+</body>
+</html>
+
+

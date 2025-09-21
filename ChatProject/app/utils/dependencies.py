@@ -1,4 +1,4 @@
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends, HTTPException, Header
 from fastapi.security import OAuth2PasswordBearer
 from jose import jwt, JWTError
 from sqlalchemy.orm import Session
@@ -16,20 +16,20 @@ def get_db():
     finally:
         db.close()
 
-def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)) -> User:
-    cred_exc = HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Неавторизовано",
-        headers={"WWW-Authenticate": "Bearer"},
-    )
+def get_current_user(authorization: str = Header(None), db: Session = Depends(get_db)):
+    if not authorization or not authorization.startswith("Bearer "):
+        raise HTTPException(status_code=401, detail="Unauthorized")
+    token = authorization.split(" ")[1]
+
     try:
         payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
-        user_id: str = payload.get("sub")
+        user_id = payload.get("sub")
         if user_id is None:
-            raise cred_exc
+            raise HTTPException(status_code=401, detail="Unauthorized")
     except JWTError:
-        raise cred_exc
+        raise HTTPException(status_code=401, detail="Unauthorized")
+
     user = db.query(User).get(int(user_id))
     if not user:
-        raise cred_exc
+        raise HTTPException(status_code=401, detail="Unauthorized")
     return user

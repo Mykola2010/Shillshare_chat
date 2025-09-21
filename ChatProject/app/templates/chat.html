@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Chat | SkillShare Hub</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="flex h-screen overflow-hidden">
+
+
+  <div class="w-1/4 bg-white border-r border-gray-300 flex flex-col">
+
+    <header class="p-4 border-b border-gray-300 flex justify-between items-center bg-indigo-600 text-white">
+        <img src="{{ url_for('static', path='logo_black.png') }}"
+             alt="SkillShare Hub Logo" class="h-10">
+    </header>
+
+
+    <div id="contacts" class="overflow-y-auto flex-1 p-3">
+
+      <div class="text-gray-500 text-center">Loading contacts...</div>
+    </div>
+  </div>
+
+
+  <div class="flex-1 flex flex-col">
+
+    <header class="bg-white p-4 text-gray-700 border-b border-gray-300">
+      <h1 id="chat-username" class="text-2xl font-semibold">Select a user</h1>
+    </header>
+
+
+    <div id="messages" class="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50">
+      <div class="text-gray-500 text-center">No conversation selected</div>
+    </div>
+
+
+    <footer class="bg-white border-t border-gray-300 p-4">
+      <form id="chat-form" class="flex items-center">
+        <input type="text" id="message-input" placeholder="Type a message..."
+               class="flex-1 p-2 rounded-md border border-gray-400 focus:outline-none focus:border-indigo-500">
+        <button type="submit"
+                class="bg-indigo-500 text-white px-4 py-2 rounded-md ml-2">Send</button>
+      </form>
+    </footer>
+  </div>
+
+  <script>
+    // Simulated current user (should come from auth/session)
+    const currentUserId = 1;
+    let selectedUserId = null;
+
+    const contactsDiv = document.getElementById("contacts");
+    const messagesDiv = document.getElementById("messages");
+    const chatUsername = document.getElementById("chat-username");
+    const chatForm = document.getElementById("chat-form");
+    const messageInput = document.getElementById("message-input");
+
+    // Fetch contacts (simulate or from backend later)
+    async function loadContacts() {
+      // TODO: replace with backend call to get users
+      const dummyContacts = [
+        { id: 2, name: "Alice" },
+        { id: 3, name: "Bob" },
+        { id: 4, name: "Charlie" }
+      ];
+
+      contactsDiv.innerHTML = "";
+      dummyContacts.forEach(user => {
+        const contact = document.createElement("div");
+        contact.className = "flex items-center mb-4 cursor-pointer hover:bg-gray-100 p-2 rounded-md";
+        contact.innerHTML = `
+          <div class="w-10 h-10 bg-gray-300 rounded-full mr-3"></div>
+          <div class="flex-1">
+            <h2 class="text-lg font-semibold">${user.name}</h2>
+            <p class="text-gray-600">Click to chat</p>
+          </div>
+        `;
+        contact.onclick = () => selectUser(user);
+        contactsDiv.appendChild(contact);
+      });
+    }
+
+    // Select a user to chat with
+    function selectUser(user) {
+      selectedUserId = user.id;
+      chatUsername.textContent = user.name;
+      loadMessages();
+    }
+
+    // Load messages with selected user
+    async function loadMessages() {
+      if (!selectedUserId) return;
+      const res = await fetch(`/chat/messages/${selectedUserId}`);
+      const data = await res.json();
+
+      messagesDiv.innerHTML = "";
+      data.forEach(msg => {
+        const wrapper = document.createElement("div");
+        const isMine = msg.sender_id === currentUserId;
+        wrapper.className = `flex mb-2 ${isMine ? "justify-end" : ""}`;
+        wrapper.innerHTML = `
+          <div class="flex max-w-md ${isMine ? "bg-indigo-500 text-white" : "bg-white text-gray-700"} rounded-lg p-3">
+            <p>${msg.content}</p>
+          </div>
+        `;
+        messagesDiv.appendChild(wrapper);
+      });
+
+      messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    }
+
+    // Send message
+    chatForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      if (!selectedUserId) return alert("Select a user first!");
+      const content = messageInput.value.trim();
+      if (!content) return;
+
+      const res = await fetch("/chat/send", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ receiver_id: selectedUserId, content })
+      });
+
+      if (res.ok) {
+        messageInput.value = "";
+        loadMessages();
+      }
+    });
+
+    // Polling messages every 3 seconds
+    setInterval(() => {
+      if (selectedUserId) loadMessages();
+    }, 3000);
+
+    // Initial load
+    loadContacts();
+  </script>
+</body>
+</html>
